@@ -5,19 +5,16 @@
 
 *Current state*: Not released yet.
 
-Roadmap
--------
-
- - Clean up temp files
- - Hide main gui on subprocess execution
-
-
 
 Future
 ------
 
+ - Clean up temp files
+ - Output to more sane place then `/tmp/timelapse.ogg`
  - Scaling images
  - Configure framerate via GUI
  - Tight connection between GUI and `gst-launch` subprocess
  - Multiple back-end support (`gst-launch-0.10`, `gst-launch-1.0`, `ffmpeg`)
  - Make sure all the images do not end up in "Recently used"
+ - Hide main gui on subprocess execution
+ - Separate temp directory per process (to allow multiple timelapse programs to run at the same time)
