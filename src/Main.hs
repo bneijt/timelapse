@@ -2,6 +2,10 @@ module Main where
 
 import Graphics.UI.Gtk
 import Graphics.UI.Gtk.Builder
+import System.Process (createProcess, proc)
+import System.Posix.Files (createSymbolicLink)
+import Control.Monad (foldM_)
+import System.Directory (doesDirectoryExist, removeDirectoryRecursive, createDirectoryIfMissing)
 
 addFileToSelectionList window listModel = do
     dialog <- fileChooserDialogNew Nothing (Just window) FileChooserActionOpen [
@@ -19,6 +23,7 @@ addFileToSelectionList window listModel = do
     widgetDestroy dialog
     return ()
 
+initializeFileList :: Builder -> IO (ListStore String)
 initializeFileList builder = do
     fileList <- listStoreNew []
     col <- treeViewColumnNew
@@ -32,6 +37,35 @@ initializeFileList builder = do
     treeViewSetHeadersVisible fileListTreeView True
     return fileList
 
+-- Creates a numbered symlink of the given file
+tmpSymlink i fName = do
+    createSymbolicLink fName ("/tmp/timelapse/" ++ (show i ) ++ ".jpg")
+    return (i + 1)
+
+removeAndRecreate path = do
+    dirThere <- doesDirectoryExist path
+    if dirThere
+        then removeDirectoryRecursive path
+        else return ()
+    createDirectoryIfMissing False path
+
+createTimelapseFrom fileListStore = do
+    files <- listStoreToList fileListStore
+    --Create symlinks to get sequenced numbers
+    removeAndRecreate "/tmp/timelapse"
+    foldM_ tmpSymlink 0 files
+    r <- createProcess (proc "xterm" ["-title", "timelapse encoding to /tmp/timelapse.ogg", "-e",
+        "gst-launch-0.10",
+        "multifilesrc", "location=\"/tmp/timelapse/%d.jpg\"", "caps=\"image/jpeg,framerate=25/1\"",
+        " ! ", "jpegdec",
+        " ! ", "videorate",
+        " ! ", "theoraenc", "drop-frames=false",
+        " ! ", "progressreport",
+        " ! ", "oggmux",
+        " ! ", "filesink",  "location=\"/tmp/timelapse.ogg\";",
+        "echo", "Done", ";", "read"
+        ])
+    return ()
 
 main :: IO()
 main = do
@@ -39,10 +73,12 @@ main = do
     builder <- builderNew
     builderAddFromFile builder "main.glade"
     addFileButton <- builderGetObject builder castToButton "addFileButton"
+    executeButton <- builderGetObject builder castToButton "executeButton"
     mainWindow <- builderGetObject builder castToWindow "mainWindow"
     fileList <- initializeFileList builder
 
     onClicked addFileButton (addFileToSelectionList mainWindow fileList)
+    onClicked executeButton (createTimelapseFrom fileList)
 
     on mainWindow objectDestroy mainQuit
     widgetShowAll mainWindow
