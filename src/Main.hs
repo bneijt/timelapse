@@ -3,18 +3,19 @@ module Main where
 import Graphics.UI.Gtk
 import Graphics.UI.Gtk.Builder
 
-addFileToSelectionList window = do
+addFileToSelectionList window listModel = do
     dialog <- fileChooserDialogNew Nothing (Just window) FileChooserActionOpen [("Cancel", ResponseCancel), ("Add", ResponseAccept)]
+    fileChooserSetSelectMultiple dialog True
     widgetShow dialog
     response <- dialogRun dialog
+
     case response of
-          ResponseCancel -> putStrLn "You cancelled..."
-          ResponseAccept -> do nwf <- fileChooserGetFilename dialog
-                               case nwf of
-                                    Nothing -> putStrLn "Nothing"
-                                    Just path -> putStrLn ("New file path is:\n" ++ path)
+          ResponseCancel -> return ()
+          ResponseAccept -> do newFiles <- fileChooserGetFilenames dialog
+                               mapM_ (listStoreAppend listModel) newFiles
     widgetDestroy dialog
     return ()
+
 
 main :: IO()
 main = do
@@ -23,7 +24,19 @@ main = do
     builderAddFromFile builder "main.glade"
     addFileButton <- builderGetObject builder castToButton "addFileButton"
     mainWindow <- builderGetObject builder castToWindow "mainWindow"
-    onClicked addFileButton (addFileToSelectionList mainWindow)
+    fileList <- listStoreNew []
+    col <- treeViewColumnNew
+    treeViewColumnSetTitle col "Images"
+    renderer <- cellRendererTextNew
+    cellLayoutPackStart col renderer False
+    cellLayoutSetAttributes col renderer fileList (\c -> [cellText := c])
+    fileListTreeView <- builderGetObject builder castToTreeView "fileListing"
+    treeViewAppendColumn fileListTreeView col
+    treeViewSetModel fileListTreeView fileList
+    treeViewSetHeadersVisible fileListTreeView True
+
+    onClicked addFileButton (addFileToSelectionList mainWindow fileList)
+
     on mainWindow objectDestroy mainQuit
     widgetShowAll mainWindow
     mainGUI
