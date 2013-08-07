@@ -54,7 +54,7 @@ createTimelapseFrom fileListStore = do
     --Create symlinks to get sequenced numbers
     removeAndRecreate "/tmp/timelapse"
     foldM_ tmpSymlink 0 files
-    r <- createProcess (proc "xterm" ["-title", "timelapse encoding to /tmp/timelapse.ogg", "-e",
+    r <- createProcess (proc "xterm" ["-hold", "-title", "timelapse encoding to /tmp/timelapse.ogg", "-e",
         "gst-launch-0.10",
         "multifilesrc", "location=\"/tmp/timelapse/%d.jpg\"", "caps=\"image/jpeg,framerate=25/1\"",
         " ! ", "jpegdec",
@@ -62,8 +62,7 @@ createTimelapseFrom fileListStore = do
         " ! ", "theoraenc", "drop-frames=false",
         " ! ", "progressreport",
         " ! ", "oggmux",
-        " ! ", "filesink",  "location=\"/tmp/timelapse.ogg\";",
-        "echo", "Done", ";", "read"
+        " ! ", "filesink",  "location=\"/tmp/timelapse.ogg\""
         ])
     return ()
 
