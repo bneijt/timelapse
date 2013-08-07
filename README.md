@@ -7,7 +7,7 @@
 
 Roadmap
 -------
- - Add scroll bars to list view
+
  - Clean up temp files
  - Hide main gui on subprocess execution
 
