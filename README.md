@@ -7,7 +7,7 @@
 
 Roadmap
 -------
-
+ - Add scroll bars to list view
  - Clean up temp files
  - Hide main gui on subprocess execution
 
@@ -20,3 +20,4 @@ Future
  - Configure framerate via GUI
  - Tight connection between GUI and `gst-launch` subprocess
  - Multiple back-end support (`gst-launch-0.10`, `gst-launch-1.0`, `ffmpeg`)
+ - Make sure all the images do not end up in "Recently used"
