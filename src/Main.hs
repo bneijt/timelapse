@@ -4,7 +4,10 @@ import Graphics.UI.Gtk
 import Graphics.UI.Gtk.Builder
 
 addFileToSelectionList window listModel = do
-    dialog <- fileChooserDialogNew Nothing (Just window) FileChooserActionOpen [("Cancel", ResponseCancel), ("Add", ResponseAccept)]
+    dialog <- fileChooserDialogNew Nothing (Just window) FileChooserActionOpen [
+        ("Cancel", ResponseCancel),
+        ("Add", ResponseAccept)
+        ]
     fileChooserSetSelectMultiple dialog True
     widgetShow dialog
     response <- dialogRun dialog
@@ -16,14 +19,7 @@ addFileToSelectionList window listModel = do
     widgetDestroy dialog
     return ()
 
-
-main :: IO()
-main = do
-    initGUI
-    builder <- builderNew
-    builderAddFromFile builder "main.glade"
-    addFileButton <- builderGetObject builder castToButton "addFileButton"
-    mainWindow <- builderGetObject builder castToWindow "mainWindow"
+initializeFileList builder = do
     fileList <- listStoreNew []
     col <- treeViewColumnNew
     treeViewColumnSetTitle col "Images"
@@ -34,6 +30,17 @@ main = do
     treeViewAppendColumn fileListTreeView col
     treeViewSetModel fileListTreeView fileList
     treeViewSetHeadersVisible fileListTreeView True
+    return fileList
+
+
+main :: IO()
+main = do
+    initGUI
+    builder <- builderNew
+    builderAddFromFile builder "main.glade"
+    addFileButton <- builderGetObject builder castToButton "addFileButton"
+    mainWindow <- builderGetObject builder castToWindow "mainWindow"
+    fileList <- initializeFileList builder
 
     onClicked addFileButton (addFileToSelectionList mainWindow fileList)
 
