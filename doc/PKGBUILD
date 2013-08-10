@@ -1,0 +1,24 @@
+# Example PKGBUILD
+pkgname=timelapse
+pkgver=0.1.0.1
+pkgrel=1
+pkgdesc="GTK GUI to create time lapse video's"
+arch=(x86_64)
+url="http://bneijt.nl/blog/post/a-gtk-gui-for-creating-time-lapse-videos/"
+license=('GPL3')
+depends=(gstreamer0.10)
+makedepends=(ghc haskell-gtk)
+source=(https://github.com/bneijt/timelapse/archive/v0.1.0.1.tar.gz)
+md5sums=('bf95cd54a26db5c520170382f5ef1336')
+
+#From http://www.haskell.org/cabal/users-guide/installing-packages.html#setup-build
+build() {
+    cd $pkgname-$pkgver
+    runhaskell Setup.hs configure --prefix=/usr
+    runhaskell Setup.hs build
+}
+
+package() {
+    cd $pkgname-$pkgver
+    runhaskell Setup.hs copy --destdir="$pkgdir/"
+}
