@@ -3,7 +3,7 @@
 
 *Why*: I could not find a simple GUI to do it already
 
-*Current state*: Not released yet.
+*Current state*: Works, but there is no easy way for any user to get it.
 
 Installation
 ------------

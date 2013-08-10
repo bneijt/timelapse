@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                timelapse
-version:             0.1.0.0
+version:             0.1.0.1
 synopsis:            Create a timelapse video from multiple frames
 -- description:         
 homepage:            http://bneijt.nl/
@@ -19,4 +19,4 @@ executable timelapse
   main-is:             Main.hs
   hs-source-dirs:      src
   -- other-modules:       
-  build-depends:       base ==4.5.*, gtk ==0.12.*, process, unix, directory
+  build-depends:       base, gtk, process, unix, directory
